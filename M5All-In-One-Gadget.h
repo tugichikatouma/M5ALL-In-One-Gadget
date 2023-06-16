@@ -96,7 +96,18 @@
 #define COMMON_BUTTON_DOWN_X_CRD 240
 #define COMMON_BUTTON_DOWN_Y_CRD 200
 // WBGT jpg image coordinate
-
+#define WBGT_TEMPERATURE_X_CRD 0
+#define WBGT_TEMPERATURE_Y_CRD 0
+#define WBGT_HUMIDITY_X_CRD 0
+#define WBGT_HUMIDITY_Y_CRD 50
+#define WBGT_SAFE_X_CRD 0
+#define WBGT_SAFE_Y_CRD 100
+#define WBGT_DEGREE_X_CRD 253
+#define WBGT_DEGREE_Y_CRD 0
+#define WBGT_PERCENT_X_CRD 253
+#define WBGT_PERCENT_Y_CRD 50
+#define COMMON_BUTTON_BACK_X_CRD 120
+#define COMMON_BUTTON_BACK_Y_CRD 200
 // Music jpg image coordinate
 
 // Measure jpg image coordinate

@@ -98,8 +98,8 @@ void AppControl::displayTitleInit()
 }
 
 void AppControl::displayMenuInit()
-{
-    mlcd.displayJpgImageCoordinate(MENU_WBGT_IMG_PATH, MENU_WBGT_X_CRD,MENU_WBGT_Y_CRD);
+{   
+    mlcd.displayJpgImageCoordinate(MENU_WBGT_FOCUS_IMG_PATH, MENU_WBGT_X_CRD,MENU_WBGT_Y_CRD);
     mlcd.displayJpgImageCoordinate(MENU_MUSIC_IMG_PATH,MENU_MUSIC_X_CRD,MENU_MUSIC_Y_CRD);
     mlcd.displayJpgImageCoordinate(MENU_MEASURE_IMG_PATH,MENU_MEASURE_X_CRD,MENU_MEASURE_Y_CRD);
     mlcd.displayJpgImageCoordinate(MENU_DATE_IMG_PATH,MENU_DATE_X_CRD,MENU_DATE_Y_CRD);
@@ -108,19 +108,61 @@ void AppControl::displayMenuInit()
     mlcd.displayJpgImageCoordinate(COMMON_BUTTON_DOWN_IMG_PATH,COMMON_BUTTON_DOWN_X_CRD,COMMON_BUTTON_DOWN_Y_CRD);
 }
 void AppControl::focusChangeImg(FocusState current_state, FocusState next_state)
-{
+{ 
+   switch (current_state) {
+        case MENU_WBGT:
+            mlcd.displayJpgImageCoordinate(MENU_WBGT_IMG_PATH, MENU_WBGT_X_CRD,MENU_WBGT_Y_CRD);
+            break;
+        case MENU_MUSIC:
+            mlcd.displayJpgImageCoordinate(MENU_MUSIC_IMG_PATH,MENU_MUSIC_X_CRD,MENU_MUSIC_Y_CRD);
+            break;
+        case MENU_MEASURE:
+            mlcd.displayJpgImageCoordinate(MENU_MEASURE_IMG_PATH,MENU_MEASURE_X_CRD,MENU_MEASURE_Y_CRD);
+            break;
+        case MENU_DATE:
+           mlcd.displayJpgImageCoordinate(MENU_DATE_IMG_PATH,MENU_DATE_X_CRD,MENU_DATE_Y_CRD);
+            break;
+    }
+
+   switch (next_state) {
+        case MENU_WBGT:
+            mlcd.displayJpgImageCoordinate(MENU_WBGT_FOCUS_IMG_PATH, MENU_WBGT_X_CRD,MENU_WBGT_Y_CRD);
+            break;
+        case MENU_MUSIC:
+            mlcd.displayJpgImageCoordinate(MENU_MUSIC_FOCUS_IMG_PATH,MENU_MUSIC_X_CRD,MENU_MUSIC_Y_CRD);
+            break;
+        case MENU_MEASURE:
+            mlcd.displayJpgImageCoordinate(MENU_MEASURE_FOCUS_IMG_PATH,MENU_MEASURE_X_CRD,MENU_MEASURE_Y_CRD);
+            break;
+        case MENU_DATE:
+           mlcd.displayJpgImageCoordinate(MENU_DATE_FOCUS_IMG_PATH,MENU_DATE_X_CRD,MENU_DATE_Y_CRD);
+            break;
+    }
+
 }
+
 
 void AppControl::displayWBGTInit()
 {
+
+    mlcd.clearDisplay();
+    mlcd.fillBackgroundWhite();
+    mlcd.displayJpgImageCoordinate(WBGT_TEMPERATURE_IMG_PATH,WBGT_TEMPERATURE_X_CRD,WBGT_TEMPERATURE_Y_CRD);
+    mlcd.displayJpgImageCoordinate(WBGT_HUMIDITY_IMG_PATH,WBGT_HUMIDITY_X_CRD,WBGT_HUMIDITY_Y_CRD);
+    mlcd.displayJpgImageCoordinate(WBGT_SAFE_IMG_PATH,WBGT_SAFE_X_CRD,WBGT_SAFE_Y_CRD);
+    mlcd.displayJpgImageCoordinate(WBGT_DEGREE_IMG_PATH,WBGT_DEGREE_X_CRD,WBGT_DEGREE_Y_CRD);
+    mlcd.displayJpgImageCoordinate(WBGT_PERCENT_IMG_PATH,WBGT_PERCENT_X_CRD,WBGT_PERCENT_Y_CRD);
+    mlcd.displayJpgImageCoordinate(COMMON_BUTTON_BACK_IMG_PATH,COMMON_BUTTON_BACK_X_CRD,COMMON_BUTTON_BACK_Y_CRD);
 }
+
 
 void AppControl::displayTempHumiIndex()
 {
 }
-
 void AppControl::displayMusicInit()
 {
+    mlcd.clearDisplay();
+    mlcd.fillBackgroundWhite();
 }
 
 void AppControl::displayMusicStop()
@@ -141,6 +183,8 @@ void AppControl::displayMusicPlay()
 
 void AppControl::displayMeasureInit()
 {
+    mlcd.clearDisplay();
+    mlcd.fillBackgroundWhite(); 
 }
 
 void AppControl::displayMeasureDistance()
@@ -149,6 +193,8 @@ void AppControl::displayMeasureDistance()
 
 void AppControl::displayDateInit()
 {
+    mlcd.clearDisplay();
+    mlcd.fillBackgroundWhite(); 
 }
 
 void AppControl::displayDateUpdate()
@@ -157,6 +203,8 @@ void AppControl::displayDateUpdate()
 
 void AppControl::controlApplication()
 {
+    mmplay.init();
+    
     while (1) {
 
         switch (getState()) {
@@ -169,16 +217,21 @@ void AppControl::controlApplication()
                 ** この関数の中身はまだ何もないので、この関数にタイトル画面表示処理を書いてみよう。
                 */
                 
-                displayTitleInit();
-                //displayMenuInit();
-                setStateMachine(TITLE,DO);
+                displayTitleInit(); 
+                setStateMachine(TITLE,DO);  
                 break;
 
-            case DO:
-                 displayMenuInit();
+            case DO:  
+                if((m_flag_btnA_is_pressed || m_flag_btnB_is_pressed || m_flag_btnC_is_pressed) == true){
+                   setBtnAllFlgFalse();
+                   displayMenuInit(); 
+                setStateMachine(TITLE,EXIT);
+                }
+                
                 break;
 
             case EXIT:
+                setStateMachine(MENU,ENTRY);
                 break;
 
             default:
@@ -188,29 +241,100 @@ void AppControl::controlApplication()
             break;
 
         case MENU:
+           
+            switch (getAction()) {  
+                case ENTRY:
+                    displayMenuInit();
+                    setStateMachine(MENU,DO);
+                    
+                case DO:
+                    if( m_flag_btnC_is_pressed == true){
+                        setBtnAllFlgFalse();
+                        switch (getFocusState()){
+                            case MENU_WBGT:
+                                focusChangeImg(MENU_WBGT,MENU_MUSIC); 
+                                setFocusState(MENU_MUSIC);
+                                break;
+                            case MENU_MUSIC:
+                                focusChangeImg(MENU_MUSIC,MENU_MEASURE); 
+                                setFocusState(MENU_MEASURE);
+                                break;
+                            case MENU_MEASURE:
+                                focusChangeImg(MENU_MEASURE,MENU_DATE);
+                                setFocusState(MENU_DATE);
+                                break;
+                            case MENU_DATE:
+                                focusChangeImg(MENU_DATE,MENU_WBGT);
+                                setFocusState(MENU_WBGT);
+                                break;
+                        }        
+                    }else if( m_flag_btnA_is_pressed == true){
+                        setBtnAllFlgFalse();
+                        switch (getFocusState()){
+                            case MENU_WBGT:
+                                focusChangeImg(MENU_WBGT,MENU_DATE); 
+                                setFocusState(MENU_DATE);
+                                break;
+                            case MENU_DATE:
+                                focusChangeImg(MENU_DATE,MENU_MEASURE); 
+                                setFocusState(MENU_MEASURE);
+                                break;
+                            case MENU_MEASURE:
+                                focusChangeImg(MENU_MEASURE,MENU_MUSIC);
+                                setFocusState(MENU_MUSIC);
+                                break;
+                            case MENU_MUSIC:
+                                focusChangeImg(MENU_MUSIC,MENU_WBGT);
+                                setFocusState(MENU_WBGT);
+                                break;
+                        }        
+                    }else if( m_flag_btnB_is_pressed == true){
+                        setBtnAllFlgFalse();
+                        switch (getFocusState()){
+                            case MENU_WBGT:
+                                 setStateMachine(MENU,EXIT);
+                                break;
+                            case MENU_MUSIC:
+                                setStateMachine(MENU,EXIT);
+                                break;
+                            case MENU_MEASURE:
+                                setStateMachine(MENU,EXIT);
+                                break;
+                            case MENU_DATE:
+                                setStateMachine(MENU,EXIT);
+                                break;
+                        }        
+                    }
+                    break;
 
-            switch (getAction()) {
-            case ENTRY:
-
-                break;
-
-            case DO:
-
-                break;
-
-            case EXIT:
-
+                case EXIT:
+                     switch (getFocusState()){
+                            case MENU_WBGT:
+                                 setStateMachine(WBGT,ENTRY);
+                                break;
+                            case MENU_MUSIC:
+                                setStateMachine(MUSIC_STOP,ENTRY);
+                                break;
+                            case MENU_MEASURE:
+                                setStateMachine(MEASURE,ENTRY);
+                                break;
+                            case MENU_DATE:
+                                setStateMachine(DATE,ENTRY);
+                                break;
+                        }                 
             default:
                 break;
             }
 
             break;
-
+ 
         case WBGT:
 
             switch (getAction()) {
             case ENTRY:
-
+                displayWBGTInit();
+                
+                setStateMachine(WBGT,DO);
                 break;
 
             case DO:
@@ -228,6 +352,8 @@ void AppControl::controlApplication()
         case MUSIC_STOP:
             switch (getAction()) {
             case ENTRY:
+                displayMusicInit();
+                setStateMachine(MUSIC_STOP,DO);
                 break;
 
             case DO:
@@ -264,6 +390,8 @@ void AppControl::controlApplication()
 
             switch (getAction()) {
             case ENTRY:
+                displayMeasureInit();
+                setStateMachine(MEASURE,DO);
                 break;
 
             case DO:
@@ -282,6 +410,8 @@ void AppControl::controlApplication()
 
             switch (getAction()) {
             case ENTRY:
+                displayDateInit();
+                setStateMachine(DATE,DO);
                 break;
 
             case DO:
