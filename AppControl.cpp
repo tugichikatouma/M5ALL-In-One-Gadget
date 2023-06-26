@@ -99,6 +99,7 @@ void AppControl::displayTitleInit()
 
 void AppControl::displayMenuInit()
 {   
+
     mlcd.displayJpgImageCoordinate(MENU_WBGT_FOCUS_IMG_PATH, MENU_WBGT_X_CRD,MENU_WBGT_Y_CRD);
     mlcd.displayJpgImageCoordinate(MENU_MUSIC_IMG_PATH,MENU_MUSIC_X_CRD,MENU_MUSIC_Y_CRD);
     mlcd.displayJpgImageCoordinate(MENU_MEASURE_IMG_PATH,MENU_MEASURE_X_CRD,MENU_MEASURE_Y_CRD);
@@ -144,20 +145,80 @@ void AppControl::focusChangeImg(FocusState current_state, FocusState next_state)
 
 void AppControl::displayWBGTInit()
 {
-
+    mwbgt.init();
     mlcd.clearDisplay();
     mlcd.fillBackgroundWhite();
     mlcd.displayJpgImageCoordinate(WBGT_TEMPERATURE_IMG_PATH,WBGT_TEMPERATURE_X_CRD,WBGT_TEMPERATURE_Y_CRD);
     mlcd.displayJpgImageCoordinate(WBGT_HUMIDITY_IMG_PATH,WBGT_HUMIDITY_X_CRD,WBGT_HUMIDITY_Y_CRD);
-    mlcd.displayJpgImageCoordinate(WBGT_SAFE_IMG_PATH,WBGT_SAFE_X_CRD,WBGT_SAFE_Y_CRD);
     mlcd.displayJpgImageCoordinate(WBGT_DEGREE_IMG_PATH,WBGT_DEGREE_X_CRD,WBGT_DEGREE_Y_CRD);
     mlcd.displayJpgImageCoordinate(WBGT_PERCENT_IMG_PATH,WBGT_PERCENT_X_CRD,WBGT_PERCENT_Y_CRD);
     mlcd.displayJpgImageCoordinate(COMMON_BUTTON_BACK_IMG_PATH,COMMON_BUTTON_BACK_X_CRD,COMMON_BUTTON_BACK_Y_CRD);
+    mlcd.displayJpgImageCoordinate(COMMON_ORANGEDOT_IMG_PATH,COMMON_ORANGEDOT_X_CRD,COMMON_ORANGEDOT_Y_CRD);
+    mlcd.displayJpgImageCoordinate(COMMON_BLUEDOT_IMG_PATH,COMMON_BLUEDOT_X_CRD,COMMON_BLUEDOT_Y_CRD);
+
 }
 
 
 void AppControl::displayTempHumiIndex()
 {
+     double temperature;
+     double humidity;
+     WbgtIndex index;
+    
+     mwbgt.getWBGT(&temperature, &humidity, &index);
+     int temperature_a = 0;
+     int temperature_b = 0;
+     int temperature_c = 0;
+     temperature_a = temperature * 10 ;
+     temperature_b = temperature_a / 10;
+     temperature_c = temperature_b / 10;
+     mlcd.displayJpgImageCoordinate(g_str_orange[temperature_a%10],WBGT_T1DECIMAL_X_CRD,WBGT_T1DECIMAL_Y_CRD);
+     mlcd.displayJpgImageCoordinate(g_str_orange[temperature_b%10],WBGT_T1DIGIT_X_CRD,WBGT_T1DIGIT_Y_CRD);
+     if(temperature_c%10 == 0){
+        mlcd.displayJpgImageCoordinate(COMMON_ORANGEFILLWHITE_IMG_PATH,COMMON_ORANGEFILLWHITE_X_CRD,COMMON_ORANGEFILLWHITE_Y_CRD);
+
+     }else{
+        mlcd.displayJpgImageCoordinate(g_str_orange[temperature_c%10],WBGT_T2DIGIT_X_CRD,WBGT_T2DIGIT_Y_CRD);
+     }
+     
+     int humidity_a = 0;
+     int humidity_b = 0;
+     int humidity_c = 0;
+     humidity_a = humidity * 10 ;
+     humidity_b = humidity_a / 10;
+     humidity_c = humidity_b / 10;
+     mlcd.displayJpgImageCoordinate(g_str_blue[humidity_a%10],WBGT_H1DECIMAL_X_CRD,WBGT_H1DECIMAL_Y_CRD);
+     mlcd.displayJpgImageCoordinate(g_str_blue[humidity_b%10],WBGT_H1DIGIT_X_CRD,WBGT_H1DIGIT_Y_CRD);
+     if(humidity_c%10 == 0){
+        mlcd.displayJpgImageCoordinate(COMMON_BLUEFILLWHITE_IMG_PATH,COMMON_BLUEFILLWHITE_X_CRD,COMMON_BLUEFILLWHITE_Y_CRD);
+
+     }else{
+        mlcd.displayJpgImageCoordinate(g_str_blue[humidity_c%10],WBGT_H2DIGIT_X_CRD,WBGT_H2DIGIT_Y_CRD);
+     }
+    
+     switch (index) {
+        case SAFE:
+            
+            mlcd.displayJpgImageCoordinate(WBGT_SAFE_IMG_PATH,WBGT_SAFE_X_CRD,WBGT_SAFE_Y_CRD);
+            
+            break;
+        case ATTENTION:
+            mlcd.displayJpgImageCoordinate(WBGT_ATTENTION_IMG_PATH,WBGT_SAFE_X_CRD,WBGT_SAFE_Y_CRD);
+
+            break;
+        case ALERT:
+            mlcd.displayJpgImageCoordinate(WBGT_ALERT_IMG_PATH,WBGT_SAFE_X_CRD,WBGT_SAFE_Y_CRD);
+
+            break;
+        case HIGH_ALERT:
+            mlcd.displayJpgImageCoordinate(WBGT_HIGH_ALERT_IMG_PATH,WBGT_SAFE_X_CRD,WBGT_SAFE_Y_CRD);
+
+            break;
+        case DANGER:
+            mlcd.displayJpgImageCoordinate(WBGT_DANGER_IMG_PATH,WBGT_SAFE_X_CRD,WBGT_SAFE_Y_CRD);
+            break; 
+    }
+
 }
 void AppControl::displayMusicInit()
 {
@@ -290,20 +351,7 @@ void AppControl::controlApplication()
                         }        
                     }else if( m_flag_btnB_is_pressed == true){
                         setBtnAllFlgFalse();
-                        switch (getFocusState()){
-                            case MENU_WBGT:
-                                 setStateMachine(MENU,EXIT);
-                                break;
-                            case MENU_MUSIC:
-                                setStateMachine(MENU,EXIT);
-                                break;
-                            case MENU_MEASURE:
-                                setStateMachine(MENU,EXIT);
-                                break;
-                            case MENU_DATE:
-                                setStateMachine(MENU,EXIT);
-                                break;
-                        }        
+                        setStateMachine(MENU,EXIT);
                     }
                     break;
 
@@ -329,18 +377,24 @@ void AppControl::controlApplication()
             break;
  
         case WBGT:
-
             switch (getAction()) {
             case ENTRY:
                 displayWBGTInit();
-                
                 setStateMachine(WBGT,DO);
                 break;
-
             case DO:
-                break;
-
+                displayTempHumiIndex();
+                delay(100);
+                if( m_flag_btnB_is_pressed == true){
+                    setBtnAllFlgFalse();
+                setStateMachine(WBGT,EXIT);
+                }
+            break;
+            
             case EXIT:
+             
+                    setStateMachine(MENU,ENTRY);
+            
                 break;
 
             default:
