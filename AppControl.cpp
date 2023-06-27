@@ -256,10 +256,15 @@ void AppControl::displayDateInit()
 {
     mlcd.clearDisplay();
     mlcd.fillBackgroundWhite(); 
+    mlcd.displayJpgImageCoordinate(DATE_NOTICE_IMG_PATH,DATE_NOTICE_X_CRD,DATE_NOTICE_Y_CRD);
+    mlcd.displayJpgImageCoordinate(COMMON_BUTTON_BACK_IMG_PATH,COMMON_BUTTON_BACK_X_CRD,COMMON_BUTTON_BACK_Y_CRD);
 }
 
 void AppControl::displayDateUpdate()
 {
+
+    mlcd.displayDateText(mdtime.readDate(),DATE_YYYYMMDD_X_CRD,DATE_YYYYMMDD_Y_CRD);
+    mlcd.displayDateText(mdtime.readTime(),DATE_HHmmSS_X_CRD,DATE_HHmmSS_Y_CRD);
 }
 
 void AppControl::controlApplication()
@@ -392,9 +397,7 @@ void AppControl::controlApplication()
             break;
             
             case EXIT:
-             
-                    setStateMachine(MENU,ENTRY);
-            
+                setStateMachine(MENU,ENTRY);
                 break;
 
             default:
@@ -469,11 +472,16 @@ void AppControl::controlApplication()
                 break;
 
             case DO:
-                break;
-
+                    displayDateUpdate();
+                    delay(100);
+                   if( m_flag_btnB_is_pressed == true){
+                    setBtnAllFlgFalse();
+                    setStateMachine(DATE,EXIT);
+                   }
+                    break;
             case EXIT:
+                setStateMachine(MENU,ENTRY);
                 break;
-
             default:
                 break;
             }
